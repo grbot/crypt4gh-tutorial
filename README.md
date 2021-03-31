@@ -16,7 +16,7 @@ git clone https://github.com/samtools/htslib-crypt4gh.git
 
 Install htslib
 ```
-cd htslib; ./configure --prefix=$HOME/opt/samtools; make && make install
+cd htslib; git submodule update --init --recursive; ./configure --prefix=$HOME/opt/samtools; make && make install
 ```
 
 Install samtools
