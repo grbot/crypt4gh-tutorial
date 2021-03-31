@@ -60,7 +60,7 @@ $HOME/opt/samtools/bin/samtools view -b -o crypt4gh:/tmp/secret.bam /tmp/MILK-10
 You can use the htsfile utility to find out what you made:
 ```
 $HOME/opt/samtools/bin/htsfile /tmp/secret.bam
-/tmp/secret.bam: crypt4gh data
+/tmp/secret.bam:  crypt4gh data
 ```
 ```
 $HOME/opt/samtools/bin/htsfile crypt4gh:/tmp/secret.bam
@@ -69,8 +69,15 @@ crypt4gh:/tmp/secret.bam: BAM version 1 compressed sequence data
 You can work on it with samtools:
 ```
 $HOME/opt/samtools/bin/samtools view -H /tmp/secret.bam
-@HD VN:1.6 SO:coordinate
-... etc ...
+@HD	VN:1.6	SO:coordinate
+@SQ	SN:MN908947.3	LN:29903	UR:https://www.ncbi.nlm.nih.gov/nuccore/MN908947.3?report=fasta	AS:MN908947.3	M5:105c82802b67521950854a851fc6eefd	SP:SARS-CoV-2 isolate Wuhan-Hu-1
+@PG	PN:bwa	ID:bwa	VN:0.7.17-r1188	CL:bwa mem -t 4 MN908947.3.fa 36316_2#316_1_val_1.fq.gz 36316_2#316_2_val_2.fq.gz
+@PG	PN:dehumanizer	ID:dehumanizer.20210215	VN:0.8.1	CL:/lustre/scratch121/esa-analysis-20200609/tmp/kl2/miniconda3/bin/dehumanise /lustre/scratch121/esa-analysis-20200609/tmp/kl2/ftc/manifest.txt /dev/stdin --preset sr --bam -o /dev/stdout --trash-minalen 25 --log dhlog.log	PP:bwa
+@PG	ID:samtools	PN:samtools	PP:dehumanizer.20210215	VN:1.11	CL:/software/pkgg/samtools/1.11.0/bin/samtools view -h -
+@PG	ID:samtools.1	PN:samtools	PP:samtools	VN:1.11	CL:/software/pkgg/samtools/1.11.0/bin/samtools view -b -
+@PG	ID:samtools.2	PN:samtools	PP:samtools.1	VN:1.11	CL:/software/pkgg/samtools/1.11.0/bin/samtools view -C -
+@PG	ID:samtools.3	PN:samtools	PP:samtools.2	VN:1.12-5-ge2d9a70	CL:/home/gerrit/opt/samtools/bin/samtools view -b -o crypt4gh:/tmp/secret.bam /tmp/MILK-10285F1.cram
+@PG	ID:samtools.4	PN:samtools	PP:samtools.3	VN:1.12-5-ge2d9a70	CL:/home/gerrit/opt/samtools/bin/samtools view -H /tmp/secret.bam
 ```
 
 When reading files, recent versions of HTSlib (1.11+) should be able to detect crypt4gh files on reading and automatically pass them to the plugin to decrypt. Older versions will need a bit of help, so you have to include the 'crypt4gh:' prefix.
@@ -83,3 +90,5 @@ for example:
 $HOME/opt/samtools/bin/crypt4gh-agent -k my_key.pub -- $HOME/opt/samtools/bin/samtools view -b -o crypt4gh:/tmp/secret.bam /tmp/MILK-10285F1.cram
 ```
 should start the agent, run samtools in it to encrypt the file and then shut everything down again. You won't have to type a passphrase in this case as you didn't give it a secret key. In theory you can run entire pipelines like this, as long as they don't try to run any remote processes.
+
+Also can add `--verbosity=8` to the samtools command to get more details on the plugin added.
