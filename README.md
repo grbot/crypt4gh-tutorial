@@ -16,17 +16,17 @@ git clone https://github.com/samtools/htslib-crypt4gh.git
 
 Install htslib
 ```
-cd htslib; git submodule update --init --recursive; ./configure --prefix=$HOME/opt/samtools; make && make install
+cd htslib; git submodule update --init --recursive; autoreconf -i; ./configure --prefix=$HOME/opt/samtools; make && make install
 ```
 
 Install samtools
 ```
-cd ../samtools; ./configure --prefix=$HOME/opt/samtools --with-htslib=$HOME/opt/samtools LDFLAGS="-Wl,-R$HOME/opt/samtools/lib"; make && make install
+cd ../samtools; autoreconf -i; ./configure --prefix=$HOME/opt/samtools --with-htslib=$HOME/opt/samtools LDFLAGS="-Wl,-R$HOME/opt/samtools/lib"; make && make install
 ```
 
 Install htslib-crypt4g
 ```
-cd ../htslib-crypt4gh; ./configure --prefix=$HOME/opt/samtools; make && make install
+cd ../htslib-crypt4gh; autoreconf -i; ./configure --prefix=$HOME/opt/samtools; make && make install
 ```
 
 To generate some keys, you can use:
