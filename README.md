@@ -16,7 +16,7 @@ git clone https://github.com/samtools/htslib-crypt4gh.git
 
 Install htslib
 ```
-cd htslib; git submodule update --init --recursive; autoreconf -i; ./configure --prefix=$HOME/opt/samtools; make && make install
+cd htslib; git submodule update --init --recursive; autoreconf -i; ./configure --prefix=$HOME/opt/samtools --enable-plugins; make && make install
 ```
 
 Install samtools
@@ -43,6 +43,11 @@ $HOME/opt/samtools/bin/crypt4gh-agent -k my_key.pub -k my_key.sec
 You only actually need both keys if you want to read and write files reading needs my_key.sec and writing my_key.pub. If you only want to do one of these, you can leave out the other key for slightly improved security. An example of where this might be useful is where you want to encrypt the data produced by your sequencing machine. The process doing this only needs the public key, which means you can keep the secret part locked away somewhere secure. Anyone compromising the process would be able to see the data being worked on at the time, but would not be able to read any of the other files that you've made. It also means you don't have to enter a passphrase, as they're only needed for secret keys.
 
 Once you're in the shell started by the agent, you can read and write encrypted files using samtools, for example:
+
+Set the HTS_PATH to the plugin first
+```
+export HTS_PATH=$HOME/opt/htslib-crypt4gh/plugin/
+```
 
 Grab a file:
 ```
