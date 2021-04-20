@@ -52,10 +52,11 @@ export HTS_PATH=$HOME/opt/htslib-crypt4gh/plugin/
 Grab a file:
 ```
 curl 'ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR531/ERR5313570/MILK-10285F1.210210_A01250_0009_AH32GCDRXY.2t316.cram' > /tmp/MILK-10285F1.cram
+curl 'ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR531/ERR5313536/MILK-11786A3.210210_A01250_0009_AH32GCDRXY.2t282.cram' > /tmp/MILK-11786A3.cram
 ```
 Convert to BAM and encrypt:
 ```
-$HOME/opt/samtools/bin/samtools view -b -o crypt4gh:/tmp/secret.bam /tmp/MILK-10285F1.cram
+$HOME/opt/samtools/bin/samtools view -b -o crypt4gh:/tmp/secret.bam /tmp/MILK-11786A3.cram
 ```
 You can use the htsfile utility to find out what you made:
 ```
