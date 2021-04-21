@@ -93,3 +93,76 @@ $HOME/opt/samtools/bin/crypt4gh-agent -k my_key.pub -- $HOME/opt/samtools/bin/sa
 should start the agent, run samtools in it to encrypt the file and then shut everything down again. You won't have to type a passphrase in this case as you didn't give it a secret key. In theory you can run entire pipelines like this, as long as they don't try to run any remote processes.
 
 Also can add `--verbosity=8` to the samtools command to get more details on the plugin added.
+
+## Test samtools on crypt4ghfs
+
+I followed the steps here: https://github.com/EGA-archive/crypt4ghfs with slight modifications.
+
+Install necessary packages
+```
+sudo apt-get install ca-certificates pkg-config git gcc make automake autoconf libtool bzip2 zlib1g-dev libssl-dev libedit-dev ninja-build cmake udev libc6-dev
+```
+
+I have a Python 3.7 conda environment already set up
+
+```
+conda activate py3.7
+```
+
+```
+conda install meson pytest
+```
+
+Install libfuse
+```
+git clone https://github.com/libfuse/libfuse.git
+cd libfuse
+git checkout fuse-3.10.0
+mkdir build
+cd build
+meson ..
+ninja
+ninja install
+```
+
+Install sshfs
+```
+git clone https://github.com/libfuse/sshfs.git
+cd sshfs
+git checkout sshfs-3.7.0
+mkdir build
+cd build
+meson ..
+ninja
+ninja install
+```
+
+Setup library path
+```
+export LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu/
+```
+
+Install cryptfhfs
+```
+pip install crypt4ghfs
+```
+
+Also install crypt4gh to encrypt a test file. It seems that encrypted files generated with htslib-crypt4gh  are not compatible with crypt4ghfs.
+```
+pip install crypt4gh
+```
+
+Check my keys and config
+```
+ls $HOME/crypt4gh-tutorial
+crypt4ghfs.conf  my_key.pub  my_key.sec
+```
+
+Enabled user_allow_other in `/usr/local/etc/fuse.conf`
+
+Set permissions on configuration file
+```
+chmod 600 $HOME/crypt4gh-tutorial/crypt4ghfs.conf
+```
+
+To be updated..
