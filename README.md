@@ -160,9 +160,32 @@ crypt4ghfs.conf  my_key.pub  my_key.sec
 
 Enabled user_allow_other in `/usr/local/etc/fuse.conf`
 
-Set permissions on configuration file
+Set permissions on configuration file (example of config file is [here](crypt4ghfs.conf))
 ```
 chmod 600 $HOME/crypt4gh-tutorial/crypt4ghfs.conf
 ```
+Now lets encrypt a CRAM file
 
-To be updated..
+First get the CRAM file
+```
+curl 'ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR531/ERR5313536/MILK-11786A3.210210_A01250_0009_AH32GCDRXY.2t282.cram' > tmp/MILK-11786A3.cram
+```
+
+And encrypt using crypt4gh
+
+```
+crypt4gh encrypt --sk $HOME/crypt4gh-tutorial/my_key.sec --recipient_pk $HOME/crypt4gh-tutorial/my_key.pub < tmp/MILK-11786A3.cram > encrypted-files/MILK-11786A3.c4gh
+```
+
+Now lets mount crypt4ghfs
+
+```
+crypt4ghfs --conf $HOME/crypt4gh-tutorial/crypt4ghfs.conf $HOME/crypt4gh-tutorial/clear-files/
+```
+
+Lets view with samtools
+```
+$HOME/opt/samtools/bin/samtools view clear-files/MILK-11786A3 | head -n2
+A01250:9:H32GCDRXY:2:2250:1145:29121	2145	MN908947.3	18	60	94H58M69H	=	28263	28447	TCCCAGGTAACAAACCAACCAACTTTCGATCTCTTGTAGATCTGTTCTCTAAACGAAC	FFFFFFFFFFFF:FFFFFFFFFFFF:F:F:F:FFFFFFFFF:FFFFF:FFFFFFFFFF	MC:Z:8M1D193M	AS:i:58	XS:i:0	SA:Z:MN908947.3,27447,+,94M127S,60,0;MN908947.3,28255,+,141S16M1D64M,60,4;	MD:Z:58	NM:i:0
+A01250:9:H32GCDRXY:2:2152:1723:4445	2145	MN908947.3	18	60	94H58M69H	=	28263	28447	TCCCAGGTAACAAACCAACCAACTTTCGATCTCTTGTAGATCTGTTCTCTAAACGAAC	FFFFFFFFFFFF:FFFFFFFFFF:FFFFFFFF:FFF::FFFFFFFFFFFF:FFFFF,F	MC:Z:8M1D193M	AS:i:58	XS:i:0	SA:Z:MN908947.3,27447,+,94M127S,60,0;MN908947.3,28255,+,141S16M1D64M,60,4;	MD:Z:58	NM:i:0
+```
