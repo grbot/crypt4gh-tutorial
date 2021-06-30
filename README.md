@@ -4,6 +4,8 @@ The first part of the tutorial is on how to use the C implementation of crypt4gh
 
 The second part of the tutorial will handle crypt4gh on FUSE mounts. This will allow for encryption and reading / manipulating of encrypted files by any tools on the system.
 
+The last part is how to use the container to also achieve what was performed in the first and second part.
+
 ## Test samtools on C implementation of crypt4gh
 
 Get source code
@@ -51,7 +53,6 @@ export HTS_PATH=$HOME/opt/htslib-crypt4gh/plugin/
 
 Grab a file:
 ```
-curl 'ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR531/ERR5313570/MILK-10285F1.210210_A01250_0009_AH32GCDRXY.2t316.cram' > /tmp/MILK-10285F1.cram
 curl 'ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR531/ERR5313536/MILK-11786A3.210210_A01250_0009_AH32GCDRXY.2t282.cram' > /tmp/MILK-11786A3.cram
 ```
 Convert to BAM and encrypt:
@@ -88,7 +89,7 @@ When you've finished work, typing `exit` in the shell will quit it and close dow
 One other trick you can do with the agent is to give it a command to run,
 for example:
 ```
-$HOME/opt/samtools/bin/crypt4gh-agent -k my_key.pub -- $HOME/opt/samtools/bin/samtools view -b -o crypt4gh:/tmp/secret.bam /tmp/MILK-10285F1.cram
+$HOME/opt/samtools/bin/crypt4gh-agent -k my_key.pub -- $HOME/opt/samtools/bin/samtools view -b -o crypt4gh:/tmp/secret.bam /tmp/MILK-11786A3.cram
 ```
 should start the agent, run samtools in it to encrypt the file and then shut everything down again. You won't have to type a passphrase in this case as you didn't give it a secret key. In theory you can run entire pipelines like this, as long as they don't try to run any remote processes.
 
@@ -147,7 +148,7 @@ Install cryptfhfs
 pip install crypt4ghfs
 ```
 
-Also install crypt4gh to encrypt a test file. It seems that encrypted files generated with htslib-crypt4gh  are not compatible with crypt4ghfs.
+Also install crypt4gh to encrypt a test file.
 ```
 pip install crypt4gh
 ```
@@ -171,7 +172,7 @@ First get the CRAM file
 curl 'ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR531/ERR5313536/MILK-11786A3.210210_A01250_0009_AH32GCDRXY.2t282.cram' > tmp/MILK-11786A3.cram
 ```
 
-And encrypt using crypt4gh
+And encrypt using crypt4gh (could have used the file encrypted with htslib-crypt4gh here as well)
 
 ```
 crypt4gh encrypt --sk $HOME/crypt4gh-tutorial/my_key.sec --recipient_pk $HOME/crypt4gh-tutorial/my_key.pub < tmp/MILK-11786A3.cram > encrypted-files/MILK-11786A3.c4gh
@@ -189,3 +190,4 @@ $HOME/opt/samtools/bin/samtools view clear-files/MILK-11786A3 | head -n2
 A01250:9:H32GCDRXY:2:2250:1145:29121	2145	MN908947.3	18	60	94H58M69H	=	28263	28447	TCCCAGGTAACAAACCAACCAACTTTCGATCTCTTGTAGATCTGTTCTCTAAACGAAC	FFFFFFFFFFFF:FFFFFFFFFFFF:F:F:F:FFFFFFFFF:FFFFF:FFFFFFFFFF	MC:Z:8M1D193M	AS:i:58	XS:i:0	SA:Z:MN908947.3,27447,+,94M127S,60,0;MN908947.3,28255,+,141S16M1D64M,60,4;	MD:Z:58	NM:i:0
 A01250:9:H32GCDRXY:2:2152:1723:4445	2145	MN908947.3	18	60	94H58M69H	=	28263	28447	TCCCAGGTAACAAACCAACCAACTTTCGATCTCTTGTAGATCTGTTCTCTAAACGAAC	FFFFFFFFFFFF:FFFFFFFFFF:FFFFFFFF:FFF::FFFFFFFFFFFF:FFFFF,F	MC:Z:8M1D193M	AS:i:58	XS:i:0	SA:Z:MN908947.3,27447,+,94M127S,60,0;MN908947.3,28255,+,141S16M1D64M,60,4;	MD:Z:58	NM:i:0
 ```
+## Using the container
