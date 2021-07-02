@@ -4,6 +4,10 @@ MAINTAINER Gerrit Botha "gerrit.botha@uct.ac.za"
 
 RUN apt-get -qq update && apt-get -qq -y install git pip autoconf libbz2-dev liblzma-dev ncurses-dev \
     libsodium-dev libcurl4-gnutls-dev \
+    ca-certificates pkg-config \
+    gcc make automake autoconf libtool \
+    bzip2 zlib1g-dev libssl-dev libedit-dev \
+    ninja-build cmake udev libc6-dev libglib2.0-dev \
     && apt-get -qq -y autoremove \
     && apt-get autoclean \
     && rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
@@ -41,6 +45,32 @@ ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/opt/samtools/lib
 # Install Python implementation of crypt4gh
 RUN pip install crypt4gh
 
+# Install crypt4gfs
+RUN pip install -U pip
+RUN pip install meson pytest
+
+WORKDIR /opt
+RUN git clone https://github.com/libfuse/libfuse.git \
+    && cd libfuse \
+    && git checkout fuse-3.10.0 \
+    && mkdir build \
+    && cd build \
+    && meson .. \
+    && ninja \
+    && ninja install
+
+RUN git clone https://github.com/libfuse/sshfs.git \
+    && cd sshfs \
+    && git checkout sshfs-3.7.0 \
+    && mkdir build \
+    && cd build \
+    && meson .. \
+    && ninja \
+    && ninja install
+
+#RUN pip install crypt4ghfs
+RUN pip install https://files.pythonhosted.org/packages/9d/81/0be5ae91e421c9f7a315f6127bab33d10460e84d10f30d9d4d8f9359ae75/crypt4ghfs-1.1.a.tar.gz
+
 # Switch back to the ubuntu user so this tool (and the files written) are not owned by root
 RUN groupadd -r -g 1000 ubuntu && useradd -r -g ubuntu -u 1000 -m ubuntu
 USER ubuntu
@@ -48,3 +78,4 @@ USER ubuntu
 WORKDIR /home/ubuntu
 
 ENV PATH /opt/samtools/bin:$PATH
+ENV PATH LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu/
