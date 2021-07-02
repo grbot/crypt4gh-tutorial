@@ -78,4 +78,4 @@ USER ubuntu
 WORKDIR /home/ubuntu
 
 ENV PATH /opt/samtools/bin:$PATH
-ENV PATH LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu/
+ENV LD_LIBRARY_PATH LD_LIBRARY_PATH:/usr/local/lib/x86_64-linux-gnu/
