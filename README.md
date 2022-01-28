@@ -18,7 +18,7 @@ git clone https://github.com/samtools/htslib-crypt4gh.git
 
 Install htslib
 ```
-cd htslib; git submodule update --init --recursive; autoreconf -i; ./configure --prefix=$HOME/opt/samtools --enable-plugins; make && make install
+cd htslib; git submodule update --init --recursive; autoreconf -i; ./configure --prefix=$HOME/opt/samtools --enable-plugins --enable-libcurl; make && make install
 ```
 
 Install samtools
@@ -45,11 +45,6 @@ $HOME/opt/samtools/bin/crypt4gh-agent -k my_key.pub -k my_key.sec
 You only actually need both keys if you want to read and write files reading needs my_key.sec and writing my_key.pub. If you only want to do one of these, you can leave out the other key for slightly improved security. An example of where this might be useful is where you want to encrypt the data produced by your sequencing machine. The process doing this only needs the public key, which means you can keep the secret part locked away somewhere secure. Anyone compromising the process would be able to see the data being worked on at the time, but would not be able to read any of the other files that you've made. It also means you don't have to enter a passphrase, as they're only needed for secret keys.
 
 Once you're in the shell started by the agent, you can read and write encrypted files using samtools, for example:
-
-Set the HTS_PATH to the plugin first
-```
-export HTS_PATH=$HOME/opt/htslib-crypt4gh/plugin/
-```
 
 Grab a file:
 ```
@@ -191,3 +186,52 @@ A01250:9:H32GCDRXY:2:2250:1145:29121	2145	MN908947.3	18	60	94H58M69H	=	28263	284
 A01250:9:H32GCDRXY:2:2152:1723:4445	2145	MN908947.3	18	60	94H58M69H	=	28263	28447	TCCCAGGTAACAAACCAACCAACTTTCGATCTCTTGTAGATCTGTTCTCTAAACGAAC	FFFFFFFFFFFF:FFFFFFFFFF:FFFFFFFF:FFF::FFFFFFFFFFFF:FFFFF,F	MC:Z:8M1D193M	AS:i:58	XS:i:0	SA:Z:MN908947.3,27447,+,94M127S,60,0;MN908947.3,28255,+,141S16M1D64M,60,4;	MD:Z:58	NM:i:0
 ```
 ## Using the container
+
+To pull the image do:
+
+```
+docker pull quay.io/grbot/crypt4gh-tutorial`
+
+docker image tag quay.io/grbot/crypt4gh-tutorial crypt4gh-tutorial
+```
+
+# Create your keypair. This will send you into the container and ask for the passphrase. You need to exit again to get to your local machine. Your key pair would be in `pwd`
+
+```
+docker run -it -v `pwd`:/home/ubuntu crypt4gh-tutorial crypt4gh-agent -g my_key
+```
+
+# Pull a sample. Do this on your local machine.
+
+```
+curl 'ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR531/ERR5313536/MILK-11786A3.210210_A01250_0009_AH32GCDRXY.2t282.cram' > /tmp/MILK-11786A3.cram
+```
+
+# Encrypt with crypt4gh
+
+```
+docker run -it -v /tmp:/tmp -v `pwd`:/home/ubuntu crypt4gh-tutorial /bin/bash -c "crypt4gh encrypt --sk my_key.sec --recipient_pk my_key.pub < /tmp/MILK-11786A3.cram > /tmp/secret2.c4gh"
+````
+
+# Mount and access
+
+```
+docker run --user root --privileged -it -v /usr/local/etc/fuse.conf:/usr/local/etc/fuse.conf  -v /tmp:/home/ubuntu/encrypted-files -v `pwd`:/home/ubuntu crypt4gh-tutorial /bin/bash
+```
+
+# Now in container
+
+```
+crypt4ghfs --conf crypt4ghfs.conf clear-files
+```
+
+```
+samtools view clear-files/secret2 | head -n 2
+```
+
+Produce
+
+```
+A01250:9:H32GCDRXY:2:2250:1145:29121    2145    MN908947.3    18    60    94H58M69H    =    28263    28447    TCCCAGGTAACAAACCAACCAACTTTCGATCTCTTGTAGATCTGTTCTCTAAACGAAC    FFFFFFFFFFFF:FFFFFFFFFFFF:F:F:F:FFFFFFFFF:FFFFF:FFFFFFFFFF    MC:Z:8M1D193M    AS:i:58XS:i:0    SA:Z:MN908947.3,27447,+,94M127S,60,0;MN908947.3,28255,+,141S16M1D64M,60,4;    MD:Z:58    NM:i:0
+A01250:9:H32GCDRXY:2:2152:1723:4445    2145    MN908947.3    18    60    94H58M69H    =    28263    28447    TCCCAGGTAACAAACCAACCAACTTTCGATCTCTTGTAGATCTGTTCTCTAAACGAAC    FFFFFFFFFFFF:FFFFFFFFFF:FFFFFFFF:FFF::FFFFFFFFFFFF:FFFFF,F    MC:Z:8M1D193M    AS:i:58XS:i:0    SA:Z:MN908947.3,27447,+,94M127S,60,0;MN908947.3,28255,+,141S16M1D64M,60,4;    MD:Z:58    NM:i:0
+```
