@@ -69,7 +69,7 @@ RUN git clone https://github.com/libfuse/sshfs.git \
     && ninja install
 
 #RUN pip install crypt4ghfs
-RUN pip install https://files.pythonhosted.org/packages/9d/81/0be5ae91e421c9f7a315f6127bab33d10460e84d10f30d9d4d8f9359ae75/crypt4ghfs-1.1.a.tar.gz
+RUN pip install crypt4ghfs
 
 # Switch back to the ubuntu user so this tool (and the files written) are not owned by root
 RUN groupadd -r -g 1000 ubuntu && useradd -r -g ubuntu -u 1000 -m ubuntu
