@@ -195,7 +195,7 @@ docker pull quay.io/grbot/crypt4gh-tutorial`
 docker image tag quay.io/grbot/crypt4gh-tutorial crypt4gh-tutorial
 ```
 
-# Create your keypair. This will send you into the container and ask for the passphrase. You need to exit again to get to your local machine. Your key pair would be in `pwd`
+Create your keypair. This will send you into the container and ask for the passphrase. You need to exit again to get to your local machine. Your key pair would be in `pwd`
 
 ```
 docker run -it -v `pwd`:/home/ubuntu crypt4gh-tutorial crypt4gh-agent -g my_key
